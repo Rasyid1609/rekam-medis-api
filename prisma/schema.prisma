@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+
+model Patient {
+  id Int @id @default(autoincrement())
+  nama String
+  nik String @unique
+  tanggalLahir DateTime
+  jenisKelamin String
+  alamat String?
+  createdAt DateTime @default(now())
+  medicalRecords MedicalRecord[]
+}
+
+model MedicalRecord {
+  id Int @id @default(autoincrement())
+  patientId Int
+  patient Patient @relation(fields: [patientId], references: [id])
+  keluhan String
+  diagnosis String
+  tindakan String?
+  dokter String
+  tanggal DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  nama String
+  email String @unique
+  password String
+  role String @default("DOKTER")
+  createdAt DateTime @default(now())
+}
