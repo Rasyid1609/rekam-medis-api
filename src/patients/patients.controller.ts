@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
@@ -6,6 +6,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { QueryPatientDto } from './dto/query-patient.dto';
 
 @ApiTags('patients')
 @ApiBearerAuth()
@@ -23,8 +24,8 @@ export class PatientsController {
 
   @Get()
   @ApiOperation({ summary: 'Mengambil semua pasien' })
-  findAll() {
-    return this.patientsService.findAll();
+  findAll(@Query() query: QueryPatientDto) {
+    return this.patientsService.findAll(query);
   }
 
   @Get(':id')

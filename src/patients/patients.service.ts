@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { QueryPatientDto } from './dto/query-patient.dto';
+import { contains } from 'class-validator';
 
 @Injectable()
 export class PatientsService {
@@ -16,8 +18,38 @@ export class PatientsService {
     });
   }
 
-  findAll() {
-    return this.prisma.patient.findMany();
+  async findAll(query: QueryPatientDto) {
+    const { page = 1, limit = 10, nama, nik } = query;
+    const skip = (page - 1) * limit;
+
+    // Membuat kondisi filter secara dinamis
+    const where: any = {};
+    if (nama) {
+      where.nama = { contains: nama };
+    }
+    if (nik) {
+      where.nik = { contains: nik};
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.patient.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {createdAt: 'desc'},
+      }),
+      this.prisma.patient.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: number) {
